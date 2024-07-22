@@ -8,11 +8,13 @@
       update_cache: yes
 
   - name: instal packages
+    tags: packages
     package:
-      name: 
-        - parted
-        - xfsprogs
-        - lvm2
+      name: "{{ item }}"
+    with_items:
+      - parted
+      - xfsprogs
+      - lvm2
 
   - name: create a partition on /dev/sdc
     parted:

@@ -7,17 +7,15 @@
     package:
       update_cache: yes
 
-  - name: install parted package
+  - name: instal packages
+    tags: packages
     package:
-      name: parted
+      name: "{{ item }}"
+    with_items:
+      - parted
+      - xfsprogs
+      - lvm2
 
-  - name: install xfs filesystem
-    package:
-      name: xfsprogs
-
-  - name: install lvm2 package 
-    package:
-      name: lvm2
 
   - name: create a partition on /dev/sdb
     parted:
