@@ -1,0 +1,45 @@
+--- 
+
+- name: fetch network information and serve
+  hosts: all
+  become: true
+  gather_facts: false
+  tasks:
+
+  - name: get ip address info
+    ansible.builtin.shell: hostname -I
+    register: ip_result
+  
+  - name: get gateway info
+    ansible.builtin.shell: ip route | grep default | awk '{print $5}'
+    register: gateway_result
+
+  - name: get time info
+    ansible.builtin.shell: date +%T
+    register: time_result
+
+  - name: create html file with network info
+    copy:
+      dest: /var/www/html/network_info.html
+      content: |
+        <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Network Information</title>
+          </head>
+          <body> 
+              <h1>Network Information</h1>
+              <p><strong>IP Address:</strong> {{ ip_result.stdout }}</p>
+              <p><strong>Gateway:</strong> {{ gateway_result.stdout }}</p>
+              <p><strong>Time:</strong> {{ time_result.stdout }}</p>
+          </body>
+          </html>
+  - name: restart apache
+    service:
+      name: apache2
+      state: restarted
+
+  - name: enable apache2 to start on boot
+    service: 
+      name: apache2
+      enabled: yes

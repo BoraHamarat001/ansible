@@ -1,0 +1,53 @@
+- hosts: all
+  become: true
+  tasks:
+
+  - name: update
+    tags: always
+    package:
+      update_cache: yes
+
+  - name: instal packages
+    package:
+      name: 
+        - parted
+        - xfsprogs
+        - lvm2
+
+  - name: create a partition on /dev/sdc
+    parted:
+      device: /dev/sdc
+      number: 1
+      state: present
+      part_type: primary
+      fs_type: xfs
+      part_start: 0%
+      part_end: 100%
+      align: optimal
+      unit: GiB
+      label: gpt
+
+  - name: Change partition type to Linux LVM
+    parted:
+      device: /dev/sdc
+      number: 1
+      flags: [ lvm ]
+
+  - name: Extend oracle_vg volume group
+    lvg:
+      vg: oracle_vg
+      pvs: /dev/sdb1,/dev/sdc1
+
+  - name: Extend oracle_lv logical volume
+    lvol:
+      vg: oracle_vg
+      lv: oracle_lv 
+      size: +100%FREE
+      state: present
+
+  - name: Extend the filesystem on the logical volume
+    filesystem:
+      fstype: xfs
+      dev: /dev/oracle_vg/oracle_lv
+      resizefs: yes
+  

@@ -1,0 +1,57 @@
+- hosts: all
+  become: true
+  tasks:
+
+  - name: update
+    tags: always
+    package:
+      update_cache: yes
+
+  - name: install parted package
+    package:
+      name: parted
+
+  - name: install xfs filesystem
+    package:
+      name: xfsprogs
+
+  - name: create a partition on /dev/sdb
+    parted:
+      device: /dev/sdb
+      number: 1
+      state: present
+      part_type: primary 
+      fs_type: xfs
+      part_start: 0%
+      part_end: 100%
+      align: optimal
+      unit: GiB
+      label: gpt
+
+  - name: format new partition with XFS #init filesystem on partition.  
+    filesystem:
+      fstype: xfs
+      dev: /dev/sdb1
+
+  - name: create directory for mount point
+    ansible.builtin.file:
+      path: /data
+      state: directory
+
+  - name: mount partition
+    mount:
+      path: /data
+      src: /dev/sdb1
+      fstype: xfs
+      state: mounted
+    register: mount_result
+
+  - name: partition to be mounted at boot
+    mount:
+      path: /data
+      src: /dev/sdb1
+      fstype: xfs
+      state: present
+      fstab: yes
+    when: mount_result.changed    
+

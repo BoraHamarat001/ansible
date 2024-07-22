@@ -1,0 +1,69 @@
+- hosts: all
+  become: true
+  tasks:
+
+  - name: update
+    tags: always
+    package:
+      update_cache: yes
+
+  - name: install parted package
+    package:
+      name: parted
+
+  - name: install xfs filesystem
+    package:
+      name: xfsprogs
+
+  - name: install lvm2 package 
+    package:
+      name: lvm2
+
+  - name: create a partition on /dev/sdb
+    parted:
+      device: /dev/sdb
+      number: 1
+      state: present
+      part_type: primary
+      fs_type: xfs
+      part_start: 0%
+      part_end: 100%
+      align: optimal
+      unit: GiB
+      label: gpt 
+
+  - name: change partition type to Linux LVM
+    parted:
+      device: /dev/sdb
+      number: 1
+      flags: [ lvm ]
+
+  - name: create physical volume
+    lvg:
+      vg: oracle_vg 
+      pvs: /dev/sdb1
+
+  - name: create logical volume 
+    lvol:
+      vg: oracle_vg
+      lv: oracle_lv
+      size: 1000M
+
+  - name: format logical volume with XFS
+    filesystem:
+      fstype: xfs
+      dev: /dev/oracle_vg/oracle_lv
+
+  - name: create mount point
+    file:
+      path: /oracle
+      state: directory
+
+  - name: mount logical volume
+    mount:
+      path: /oracle
+      src: /dev/oracle_vg/oracle_lv
+      fstype: xfs
+      state: mounted
+
+

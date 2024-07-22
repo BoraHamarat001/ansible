@@ -1,0 +1,31 @@
+---
+- name: Gather network information and generate HTML
+  hosts: all
+  become: true
+  tasks:
+
+    - name: create network information HTML file from template    
+      ansible.builtin.template:
+        src: network_info.html
+        dest: /var/www/html/network_info.html
+        mode: '0644'
+        owner: root
+        group: root
+
+    - name: change default html file for apache server
+      lineinfile:
+        path: /etc/apache2/sites-available/000-default.conf
+        regexp: '^\s*DirectoryIndex\s+'
+        line: '        DirectoryIndex network_info.html index.html'
+      register: httpd
+
+    - name: restart apache2
+      service:
+        name: apache2
+        state: restarted
+      when: httpd.changed
+
+    - name: enable apache2 on boot
+      service: 
+        name: apache2
+        enabled: yes   
