@@ -1,0 +1,30 @@
+---
+- hosts: all
+  become: true
+  vars:
+    mysql_root_password: "root111"
+    mysql_database_name: "db1"
+    mysql_dump_file: "/tmp/dump.sql"
+
+  tasks:
+  
+  - name: Copy database dump file to target server
+    copy:
+      src: /home/bora/ansible/DB/dump.sql
+      dest: "{{ mysql_dump_file }}"
+
+  - name: Create MySQL database
+    mysql_db:
+      name: "{{ mysql_database_name }}"
+      state: present
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+
+  - name: Restore database from dump file
+    mysql_db:
+      name: "{{ mysql_database_name }}"
+      state: import
+      target: "{{ mysql_dump_file }}"
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+

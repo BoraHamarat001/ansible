@@ -1,0 +1,69 @@
+---
+
+- hosts: all
+  become: true
+  tasks: 
+  vars: 
+    mysql_root_password: "root111"
+    mysql_database_name: "db1"
+    mysql_user: "bora"
+    mysql_password: "bora111"
+
+  tasks: 
+    
+  - name: update apt package index
+    apt: 
+     update_cache: yes
+
+  - name: install mysql server
+    apt:
+     name: 
+       - mysql-server
+       - python3-pymysql
+     state: present
+
+  - name: ensure mysql service is running
+    service:
+      name: mysql
+      state: started
+      enabled: yes
+
+  - name: set mysql root password
+    mysql_user:
+      name: root
+      host: localhost
+      password: "{{mysql_root_password}}"
+      login_unix_socket: /var/run/mysqld/mysqld.sock
+      state: present
+
+  - name: remove mysql anonymous user
+    mysql_user:
+      name: ""
+      host: localhost
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      state: absent
+
+  - name: remove mysql test database
+    mysql_db:
+      name: test
+      state: absent
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+
+  - name: create mysql database
+    mysql_db:
+      name: "{{ mysql_database_name }}"
+      state: present
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+
+  - name: create mysql user
+    mysql_user:
+      name: "{{ mysql_user }}"
+      password: "{{ mysql_password }}" 
+      priv: "{{ mysql_database_name }}.*:ALL"
+      login_user: root
+      login_password: "{{ mysql_root_password }}"
+      state: present
+
