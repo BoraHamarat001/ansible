@@ -2,12 +2,12 @@
 
 - hosts: all
   become: true
-  tasks: 
-  vars: 
+  vars:
     mysql_root_password: "root111"
     mysql_database_name: "db1"
     mysql_user: "bora"
     mysql_password: "bora111"
+    table_name: "users"
 
   tasks: 
     
@@ -33,6 +33,8 @@
       name: root
       host: localhost
       password: "{{mysql_root_password}}"
+      login_user: root
+      login_password: root111
       login_unix_socket: /var/run/mysqld/mysqld.sock
       state: present
 
@@ -66,4 +68,27 @@
       login_user: root
       login_password: "{{ mysql_root_password }}"
       state: present
+
+  - name: create table in database
+    mysql_query:
+      login_user: "{{ mysql_user }}"
+      login_password: "{{ mysql_password }}"
+      login_db: "{{ mysql_database_name }}"
+      query: |
+          CREATE TABLE IF NOT EXISTS {{ table_name }} (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          );
+
+  - name: insert to table
+    mysql_query:
+        login_user: "{{ mysql_user }}"
+        login_password: "{{ mysql_password }}"
+        login_db: "{{ mysql_database_name }}"
+        query: |
+          INSERT INTO {{ table_name }} (id,name) VALUES
+          (1,'bora'),
+          (2,'beril'),
+          (3,'tuğkan');
 

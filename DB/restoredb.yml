@@ -2,9 +2,9 @@
 - hosts: all
   become: true
   vars:
-    mysql_root_password: "root111"
-    mysql_database_name: "db1"
-    mysql_dump_file: "/tmp/dump.sql"
+    mysql_dump_file: /tmp/dump.sql
+    mysql_root_password: root111
+    mysql_database_name: db1
 
   tasks:
   

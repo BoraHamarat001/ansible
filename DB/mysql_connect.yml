@@ -1,0 +1,67 @@
+---
+
+- hosts: all
+  become: true
+  vars:
+    db_name: db1
+    db_user: bora
+    db_password: bora111
+    web_root: /var/www/html
+    php_file: db_connect.php
+
+  tasks:
+
+  - name: update cache
+    apt:
+      update_cache: yes
+
+  - name: install php and php-mysql packages
+    apt:
+      name:
+        - php
+        - php-mysql
+      state: present 
+
+  - name: create db_connect.php file
+    copy:
+      dest: "{{ web_root }}/{{ php_file }}"
+      content: |
+          <?php
+          error_reporting(E_ALL);
+          ini_set('display_errors', 1);
+
+          $servername = "localhost";
+          $username = "{{ db_user }}";
+          $password = "{{ db_password }}";
+          $dbname = "{{ db_name }}";
+
+          // Create connection
+          $conn = new mysqli($servername, $username, $password, $dbname);
+
+          // Check connection
+          if ($conn->connect_error) {
+              die("Connection failed: " . $conn->connect_error);
+          }
+          echo "Connected successfully";
+          ?>
+
+  - name: Set ownership and permissions for db_connect.php
+    file:
+      path: "{{ web_root }}/{{ php_file }}"
+      state: file
+      owner: www-data
+      group: www-data
+      mode: '0644'
+
+  - name: Ensure web root has proper ownership and permissions
+    file:
+      path: "{{ web_root }}"
+      state: directory
+      owner: www-data
+      group: www-data
+      mode: '0755'
+
+  - name: restart apache
+    service:
+      name: apache2
+      state: restarted
