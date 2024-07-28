@@ -1,0 +1,57 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: Update apt cache
+    apt:
+      update_cache: yes
+
+  - name: Install Node.js and npm
+    apt:
+      name:
+        - nodejs
+        - npm
+      state: present
+
+  - name: get ip address info
+    ansible.builtin.shell: hostname -I
+    register: ip_result
+
+  - name: create server directory
+    file:
+      path: /home/bora/my-server
+      state: directory
+
+  - name: initalize node
+    command: "npm init -y"
+    args:
+      chdir: /home/bora/my-server
+
+
+  - name: create index.js file
+    copy:
+      dest: /home/bora/my-server/index.js
+      content: |
+        const http = require('http');
+        const hostname = '192.168.1.52';
+        const port = 8000;
+
+        const server = http.createServer((req, res) => {
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'text/plain');
+          res.end('Hello from server on {{ip_result.stdout}}\n');
+        });
+
+        server.listen(port, hostname, () => {
+          console.log(`Server running at http://${hostname}:${port}/`);
+        });
+      mode: 0644
+      owner: root
+      group: root
+
+  - name: Start Node.js server
+    command: "node /home/bora/my-server/index.js"
+    async: 1
+    poll: 0
