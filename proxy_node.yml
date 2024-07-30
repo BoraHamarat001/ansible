@@ -1,0 +1,73 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: install pm2 globally 
+    npm:
+      name: pm2
+      global: yes
+
+  - name: start node.js app with pm2
+    command: "pm2 start /home/bora/my-server/index.js --name my-server"
+    args:
+      chdir: /home/bora/my-server
+
+  - name: pm2 start on boot
+    command: "pm2 startup"
+
+  - name: Save pm2 process list
+    command: "pm2 save"
+
+  - name: Create Apache virtual host configuration for reverse proxy
+    copy:
+      dest: /etc/apache2/sites-available/000-default.conf
+      content: |
+        <VirtualHost *:80>
+            ServerAdmin webmaster@localhost
+            DocumentRoot /var/www/html
+            DirectoryIndex network_info.html index.html
+
+            # Proxy settings for Node.js
+            ProxyRequests Off
+            ProxyPass /api http://192.168.1.52:8000/
+            ProxyPassReverse /api http://192.168.1.52:8000/
+
+
+            ErrorLog ${APACHE_LOG_DIR}/error.log
+            CustomLog ${APACHE_LOG_DIR}/access.log combined
+        </VirtualHost>
+      owner: root
+      group: root
+      mode: '0644'
+
+        #- name: Ensure proxy module is enabled
+        #apache2_module:
+        #name: proxy
+        #state: present
+
+        #- name: Ensure proxy_http module is enabled
+        #apache2_module:
+        #name: proxy_http
+        #state: present
+  - name: ensure apache proxy modules are enabled
+    apache2_module:
+      name: "{{ item }}"
+      state: present
+    loop:
+      - proxy
+      - proxy_http
+
+  - name: enable the new site
+    ansible.builtin.file:
+      path: /etc/apache2/sites-enabled/000-default.conf
+      state: link
+      src: /etc/apache2/sites-available/000-default.conf
+
+  - name: restart apache 
+    service:
+      name: apache2
+      state: restarted
+
+      
