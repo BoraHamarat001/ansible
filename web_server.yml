@@ -1,0 +1,33 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+  
+  - name: update
+    tags: always 
+    package:
+      update_cache: yes
+
+  - name: install apache and php packages (Ubuntu)
+    tags: ubuntu,apache2,php
+    apt:
+      name: 
+        - apache2
+        - libapache2-mod-php
+      state: latest
+  
+  - name: create html file with network info
+    copy:
+      dest: /var/www/html/index.html
+      content: |
+        <!DOCTYPE html>
+          <html>
+          <head>
+              <title>Nebula...</title>
+          </head>
+          <body>
+              <p>Default web page</p>
+          </body>
+          </html>
+

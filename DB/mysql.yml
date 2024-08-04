@@ -80,15 +80,3 @@
             name VARCHAR(255) NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
           );
-
-  - name: insert to table
-    mysql_query:
-        login_user: "{{ mysql_user }}"
-        login_password: "{{ mysql_password }}"
-        login_db: "{{ mysql_database_name }}"
-        query: |
-          INSERT INTO {{ table_name }} (id,name) VALUES
-          (1,'bora'),
-          (2,'beril'),
-          (3,'tuğkan');
-

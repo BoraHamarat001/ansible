@@ -45,7 +45,7 @@
     lvol:
       vg: oracle_vg
       lv: oracle_lv
-      size: 1000M
+      size: +100%FREE
 
   - name: format logical volume with XFS
     filesystem:

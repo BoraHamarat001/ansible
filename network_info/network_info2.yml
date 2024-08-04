@@ -20,7 +20,7 @@
 
   - name: create html file with network info
     copy:
-      dest: /var/www/html/network_info.html
+      dest: /var/www/html/index.html
       content: |
         <!DOCTYPE html>
           <html>

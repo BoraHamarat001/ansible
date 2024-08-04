@@ -1,0 +1,27 @@
+---
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: stop mysql service
+    service:
+      name: mysql
+      state: stopped
+
+  - name: copy mysql fikes to new directory
+    copy:
+      src: /var/lib/mysql/.
+      dest: /oracle/mysql/
+
+  - name: update my.cnf to point to the new data directory
+    lineinfile:
+      path: /etc/my.cnf
+      regexp: '^datadir=.*'
+      line: 'datadir = /oracle/mysql'
+      backrefs: yes
+
+  - name: start mysql service
+    service:
+      name: mysql
+      state: started
