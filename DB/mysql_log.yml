@@ -8,18 +8,47 @@
     service:
       name: mysql
       state: stopped
+  
+  - name: Create /oracle/mysql directory
+    file:
+      path: /oracle/mysql
+      state: directory
+      owner: mysql
+      group: mysql
+      mode: '0750'
 
-  - name: copy mysql fikes to new directory
+ - name: Create empty error.log file
+   file:
+     path: /oracle/mysql/error.log
+     state: touch
+     owner: mysql
+     group: mysql
+     mode: '0640'
+ 
+ - name: Create /oracle/mysql/data directory
+   file:
+    path: /oracle/mysql/data
+    state: directory
+    owner: mysql
+    group: mysql
+    mode: '0750'
+
+  - name: copy mysql files to new directory
     copy:
       src: /var/lib/mysql/.
-      dest: /oracle/mysql/
+      dest: /oracle/mysql/data
 
-  - name: update my.cnf to point to the new data directory
+  - name: update log config file to point to the new data directory
     lineinfile:
-      path: /etc/my.cnf
+      path: /etc/mysql/mysql.conf.d/mysqld.cnf
       regexp: '^datadir=.*'
       line: 'datadir = /oracle/mysql'
-      backrefs: yes
+
+  - name: update mysql.cnf configuration file
+    lineinfile:
+      path: /etc/mysql/mysql.conf.d/mysqld.cnf
+      regexp: '^log_error\s*='
+      line: 'log_error = /oracle/mysql/error.log'
 
   - name: start mysql service
     service:
