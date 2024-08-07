@@ -41,7 +41,7 @@
   - name: update log config file to point to the new data directory
     lineinfile:
       path: /etc/mysql/mysql.conf.d/mysqld.cnf
-      regexp: '^datadir=.*'
+      regexp: '^datadir.*'
       line: 'datadir = /oracle/mysql'
 
   - name: update mysql.cnf configuration file
