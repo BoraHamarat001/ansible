@@ -1,0 +1,78 @@
+---
+- hosts: all
+  become: true
+  gather_facts: false
+  ignore_errors: true
+  ignore_unreachable: true
+  tasks:
+    - name: install mysql server
+      yum:
+        name:
+          - mysql-server
+    - name: Install py package
+      pip:
+        name: pymysql
+        extra_args: -i
+          https://scorenexus.isbank/repository/pypi-group/simple    
+    - name: ensure mysql service is running
+      service:
+        name: mysqld
+        state: started
+        enabled: yes
+    - name: set mysql root password
+      mysql_user:
+        name: root
+        host: localhost
+        password: "{{mysql_root_password}}"
+        login_user: root
+        login_password: "{{mysql_root_password}}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        state: present
+    - name: create mysql database
+      mysql_db:
+        name: "{{ mysql_database_name }}"
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+    - name: create mysql user
+      mysql_user:
+        name: "{{ mysql_user }}"
+        password: "{{ mysql_password }}"
+        priv: "{{ mysql_database_name }}.*:ALL"
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+    - name: Create /mysql/log and /mysql/data directories
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: mysql
+        group: mysql
+        mode: '0750'
+      with_items:
+       - /mysql/log
+       - /mysql/data  
+    - name: Create empty error.log file
+      file:
+        path: /mysql/log/error.log
+        state: touch
+        owner: mysql
+        group: mysql
+        mode: '0640'
+    - name: copy mysql files to new directory
+      copy:
+        src: /var/lib/mysql/.
+        dest: /mysql/data
+    - name: update log config file to point to the new data directory
+      lineinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: '^datadir.*'
+        line: 'datadir = /mysql/data'
+    - name: update mysql.cnf configuration file
+      lineinfile:
+        path: /etc/mysql/mysql.conf.d/mysqld.cnf
+        regexp: '^log_error\s*='
+        line: 'log_error = /mysql/log/error.log'
+    - name: start mysql service
+      service:
+        name: mysql
+        state: restarted
