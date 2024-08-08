@@ -1,0 +1,24 @@
+---
+- hosts: all
+  become: true
+  tasks:
+  - name: stop mysql service
+    service:
+      name: mysql
+      state: stopped
+  - name: Create /oracle/mysql directory
+    file:
+      path: /oracle/mysql
+      state: directory
+      owner: mysql
+      group: mysql
+      mode: '0750'
+  - name: update log config file to point to the new data directory
+    lineinfile:
+      path: /etc/mysql/mysql.conf.d/mysqld.cnf
+      regexp: '^datadir.*'
+      line: 'datadir = /oracle/mysql'
+  - name: start mysql service
+    service:
+      name: mysql
+      state: started
