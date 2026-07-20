@@ -1,211 +1,80 @@
-# Ansible Playbook Koleksiyonu
+# Ansible Linux Automation
 
-Bu repo, Ubuntu/Debian tabanlı sunucularda web sunucusu, veritabanı, Node.js uygulaması ve disk yönetimi işlemlerini otomatize eden Ansible playbook'larını içerir.
+A collection of Ansible playbooks for automating common Linux server administration tasks on Ubuntu/Debian systems.
+
+This project demonstrates practical infrastructure automation including web server deployment, database management, Node.js application deployment, storage management, and network information collection.
 
 ---
 
-## Proje Yapısı
+## Features
 
-```
+- Apache Web Server Installation & Configuration
+- MySQL Installation & Secure Configuration
+- MySQL Database Restore
+- MySQL Data Directory Relocation
+- PHP & MySQL Connection Page
+- Node.js + PM2 Deployment
+- LVM Creation & Extension
+- Disk Partitioning & Mounting
+- Network Information Collection
+- Modular Role-Based Ansible Structure
+- Centralized Inventory & Configuration
+- Ansible Vault Support
+
+---
+
+## Repository Structure
+
+```text
 ansible/
-├── ansible.cfg                      # Merkezi Ansible yapılandırması
+├── ansible.cfg
 ├── inventory/
-│   ├── hosts                        # Sunucu envanteri
-│   └── group_vars/
-│       ├── all.yml                  # Tüm sunucular için değişkenler
-│       ├── webservers.yml           # Web sunucusu değişkenleri
-│       ├── dbservers.yml            # Veritabanı değişkenleri
-│       ├── appservers.yml           # Uygulama sunucusu değişkenleri
-│       └── storageservers.yml       # Disk/storage değişkenleri
-├── vault/
-│   └── secrets.yml                  # ŞİFRELENMESİ GEREKEN hassas veriler
-├── roles/
-│   ├── common/                      # Tüm sunucularda çalışan temel görevler
-│   ├── apache/                      # Apache web sunucusu kurulumu
-│   ├── nodejs/                      # Node.js + PM2 uygulama sunucusu
-│   ├── mysql/                       # MySQL kurulum ve yapılandırma
-│   ├── mysql_relocate/              # MySQL veri dizinini yeniden konumlandırma
-│   ├── mysql_restore/               # MySQL dump'tan veritabanı geri yükleme
-│   ├── php_mysql/                   # PHP + MySQL bağlantı sayfası
-│   ├── lvm/                         # LVM kurulumu (PV→VG→LV→mount)
-│   ├── lvm_extend/                  # Mevcut LVM'i yeni diskle genişletme
-│   ├── disk/                        # Düz disk bölümleme ve mount
-│   └── network_info/                # Ağ bilgilerini topla ve web'de sun
-├── files/
-│   └── dump.sql                     # MySQL örnek dump dosyası
+│   ├── hosts
+│   ├── group_vars/
+│   └── host_vars/
 │
-│   — Playbook'lar —
-├── site.yml                         # Ana playbook (tüm roller)
-├── web.yml                          # Web sunucusu
-├── db.yml                           # Veritabanı kurulumu
-├── db_restore.yml                   # Veritabanı geri yükleme
-├── db_relocate.yml                  # MySQL dizin taşıma
-├── db_connect.yml                   # PHP-MySQL bağlantı sayfası
-├── lvm.yml                          # LVM kurulumu
-├── extend_lvm.yml                   # LVM genişletme
-├── disk.yml                         # Disk bölümleme
-└── network_info.yml                 # Ağ bilgileri toplama
+├── vault/
+│   └── secrets.yml
+│
+├── roles/
+│   ├── common/
+│   ├── apache/
+│   ├── mysql/
+│   ├── mysql_restore/
+│   ├── mysql_relocate/
+│   ├── php_mysql/
+│   ├── nodejs/
+│   ├── lvm/
+│   ├── lvm_extend/
+│   ├── disk/
+│   └── network_info/
+│
+├── files/
+│   └── dump.sql
+│
+├── site.yml
+├── web.yml
+├── db.yml
+├── db_restore.yml
+├── db_relocate.yml
+├── db_connect.yml
+├── lvm.yml
+├── extend_lvm.yml
+├── disk.yml
+└── network_info.yml
 ```
 
 ---
 
-## Hızlı Başlangıç
+## Requirements
 
-### 1. Inventory'yi Düzenle
+| Software  | Version                    |
+| --------- | -------------------------- |
+| Ansible   | 2.14+                      |
+| Python    | 3.8+                       |
+| Target OS | Ubuntu 20.04+ / Debian 11+ |
 
-`inventory/hosts` dosyasını açıp sunucu IP adreslerini güncelle:
-
-```ini
-[webservers]
-192.168.1.XX
-
-[dbservers]
-192.168.1.XX
-```
-
-### 2. Vault ile Şifreleri Koru
-
-`vault/secrets.yml` dosyasındaki şifreleri gerçek değerlerle doldur, ardından şifrele:
-
-```bash
-# Şifreleri düzenle
-nano vault/secrets.yml
-
-# Dosyayı şifrele
-ansible-vault encrypt vault/secrets.yml
-
-# Daha sonra düzenlemek için
-ansible-vault edit vault/secrets.yml
-```
-
-### 3. SSH Anahtarını Oluştur
-
-```bash
-ssh-keygen -t ed25519 -f ~/.ssh/ansible -C "ansible"
-ssh-copy-id -i ~/.ssh/ansible.pub bora@192.168.1.XX
-```
-
----
-
-## Playbook Kullanımı
-
-### Web Sunucusu (Apache)
-
-```bash
-# Apache'yi kur
-ansible-playbook web.yml
-
-# Sadece yapılandırmayı güncelle
-ansible-playbook web.yml --tags config
-
-# Belirli bir host için
-ansible-playbook web.yml --limit 192.168.1.45
-```
-
-### Veritabanı (MySQL)
-
-```bash
-# MySQL kur ve yapılandır
-ansible-playbook db.yml --ask-vault-pass
-
-# Sadece güvenlik adımları
-ansible-playbook db.yml --ask-vault-pass --tags security
-
-# Dump'tan geri yükle
-ansible-playbook db_restore.yml --ask-vault-pass
-
-# MySQL dizinlerini LVM'e taşı (önce lvm.yml çalıştır)
-ansible-playbook db_relocate.yml --ask-vault-pass
-```
-
-### PHP-MySQL Bağlantı Sayfası
-
-```bash
-ansible-playbook db_connect.yml --ask-vault-pass
-```
-
-### Node.js Uygulama Sunucusu
-
-```bash
-# Node.js + PM2 kur ve uygulamayı başlat
-ansible-playbook site.yml --tags nodejs --ask-vault-pass
-```
-
-### Disk ve LVM Yönetimi
-
-```bash
-# Düz disk bölümleme (LVM'siz)
-ansible-playbook disk.yml
-
-# LVM kurulumu
-ansible-playbook lvm.yml
-
-# Mevcut LVM'i yeni diskle genişlet
-ansible-playbook extend_lvm.yml
-
-# Farklı disk belirterek çalıştır
-ansible-playbook lvm.yml -e "lvm_disk_device=/dev/sdc lvm_vg_name=data_vg"
-```
-
-### Ağ Bilgileri Sayfası
-
-```bash
-# Sunucunun IP, hostname ve saat bilgisini Apache ile sun
-ansible-playbook network_info.yml
-```
-
-### Tüm Sistemi Bir Seferde Kur
-
-```bash
-ansible-playbook site.yml --ask-vault-pass
-```
-
----
-
-## Etiket (Tag) Referansı
-
-| Etiket       | Açıklama                            |
-|:-------------|:------------------------------------|
-| `always`     | Her zaman çalışır (cache güncelleme)|
-| `apache`     | Apache görevleri                    |
-| `mysql`      | MySQL görevleri                     |
-| `nodejs`     | Node.js görevleri                   |
-| `pm2`        | PM2 servis yönetimi                 |
-| `lvm`        | LVM görevleri                       |
-| `disk`       | Disk bölümleme görevleri            |
-| `network`    | Ağ bilgisi görevleri                |
-| `packages`   | Sadece paket kurulumu               |
-| `config`     | Sadece yapılandırma değişiklikleri  |
-| `security`   | Güvenlik ve kullanıcı yönetimi      |
-| `restore`    | Veritabanı geri yükleme             |
-| `relocate`   | Dizin taşıma işlemleri              |
-
----
-
-## Değişken Önceliği
-
-Değişkenler aşağıdaki öncelik sıralamasıyla yüklenir (yukarı → daha yüksek öncelik):
-
-```
-roles/<rol>/defaults/main.yml   ← en düşük
-inventory/group_vars/all.yml
-inventory/group_vars/<group>.yml
--e "key=value" (komut satırı)   ← en yüksek
-```
-
-Sunucuya özel değerleri `inventory/host_vars/<ip>.yml` dosyasına ekleyebilirsin.
-
----
-
-## Gereksinimler
-
-| Yazılım        | Sürüm   |
-|:---------------|:--------|
-| Ansible        | ≥ 2.14  |
-| Python         | ≥ 3.8   |
-| Hedef OS       | Ubuntu 20.04+ / Debian 11+ |
-
-### Gerekli Ansible Koleksiyonları
+### Required Collections
 
 ```bash
 ansible-galaxy collection install community.mysql
@@ -215,16 +84,219 @@ ansible-galaxy collection install ansible.posix
 
 ---
 
-## Güvenlik Notları
+## Quick Start
 
-- `vault/secrets.yml` dosyasını **asla şifrelemeden** commit etme.
-- `.gitignore` dosyasına `vault/secrets.yml` veya `.vault_pass` eklemeyi düşün.
-- Vault şifresini CI/CD sistemlerinde ortam değişkeni olarak sakla: `ANSIBLE_VAULT_PASSWORD_FILE`.
+### Clone the repository
+
+```bash
+git clone https://github.com/BoraHamarat001/ansible.git
+cd ansible
+```
+
+### Configure Inventory
+
+Edit the inventory file with your own servers.
+
+```ini
+[webservers]
+192.168.1.XX
+
+[dbservers]
+192.168.1.XX
+```
+
+### Configure Vault
+
+Edit your secrets.
+
+```bash
+nano vault/secrets.yml
+```
+
+Encrypt the file.
+
+```bash
+ansible-vault encrypt vault/secrets.yml
+```
+
+Edit later if needed.
+
+```bash
+ansible-vault edit vault/secrets.yml
+```
+
+### Configure SSH
+
+```bash
+ssh-keygen -t ed25519 -f ~/.ssh/ansible -C "ansible"
+
+ssh-copy-id -i ~/.ssh/ansible.pub user@server
+```
 
 ---
 
-## Notlar
+# Playbook Examples
 
-- `mysql2.yml` (eski): RHEL/CentOS için hazırlanmıştı ve şirkete özel bir pip mirror kullanıyordu. Bu işlevsellik için gerekirse `roles/mysql/tasks/` altında ayrı bir `rhel.yml` görevi eklenebilir.
-- Tüm servis yeniden başlatmaları handler üzerinden yapılır; idempotent çalışmayı garanti eder.
-- `gather_facts: false` olan playbook'larda (network_info) sadece gerekli bilgiler `ansible.builtin.command` ile toplanır.
+## Apache Web Server
+
+```bash
+ansible-playbook web.yml
+```
+
+Update only the configuration.
+
+```bash
+ansible-playbook web.yml --tags config
+```
+
+Run against a specific host.
+
+```bash
+ansible-playbook web.yml --limit 192.168.1.45
+```
+
+---
+
+## MySQL
+
+Install and configure MySQL.
+
+```bash
+ansible-playbook db.yml --ask-vault-pass
+```
+
+Run only security tasks.
+
+```bash
+ansible-playbook db.yml --ask-vault-pass --tags security
+```
+
+Restore a database.
+
+```bash
+ansible-playbook db_restore.yml --ask-vault-pass
+```
+
+Relocate MySQL data directory.
+
+```bash
+ansible-playbook db_relocate.yml --ask-vault-pass
+```
+
+---
+
+## PHP + MySQL
+
+```bash
+ansible-playbook db_connect.yml --ask-vault-pass
+```
+
+---
+
+## Node.js Application
+
+```bash
+ansible-playbook site.yml --tags nodejs --ask-vault-pass
+```
+
+---
+
+## Storage Management
+
+Disk partitioning.
+
+```bash
+ansible-playbook disk.yml
+```
+
+Create an LVM.
+
+```bash
+ansible-playbook lvm.yml
+```
+
+Extend an existing LVM.
+
+```bash
+ansible-playbook extend_lvm.yml
+```
+
+Specify a custom disk.
+
+```bash
+ansible-playbook lvm.yml \
+-e "lvm_disk_device=/dev/sdc lvm_vg_name=data_vg"
+```
+
+---
+
+## Network Information
+
+Collect server information and publish it through Apache.
+
+```bash
+ansible-playbook network_info.yml
+```
+
+---
+
+## Deploy Everything
+
+```bash
+ansible-playbook site.yml --ask-vault-pass
+```
+
+---
+
+## Available Tags
+
+| Tag      | Description           |
+| -------- | --------------------- |
+| always   | Always executed       |
+| apache   | Apache tasks          |
+| mysql    | MySQL tasks           |
+| nodejs   | Node.js deployment    |
+| pm2      | PM2 management        |
+| lvm      | LVM tasks             |
+| disk     | Disk partitioning     |
+| network  | Network information   |
+| packages | Package installation  |
+| config   | Configuration tasks   |
+| security | Security tasks        |
+| restore  | Database restore      |
+| relocate | MySQL data relocation |
+
+---
+
+## Variable Priority
+
+Variables are loaded in the following order.
+
+```text
+roles/<role>/defaults/main.yml
+
+inventory/group_vars/all.yml
+
+inventory/group_vars/<group>.yml
+
+inventory/host_vars/<host>.yml
+
+Command line (-e key=value)
+```
+
+---
+
+## Security Notes
+
+- Never commit unencrypted secrets.
+- Store Vault passwords securely.
+- Add sensitive files such as `.vault_pass` to `.gitignore`.
+- Consider using environment variables or CI/CD secret management for Vault passwords.
+
+---
+
+## Notes
+
+- All playbooks are designed to be idempotent.
+- Service restarts are handled using Ansible handlers.
+- The repository follows a role-based project structure for better scalability and maintainability.
