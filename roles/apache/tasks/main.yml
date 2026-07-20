@@ -1,0 +1,31 @@
+---
+# ---------------------------------------------------------------------------
+# apache rolü — Apache web sunucusu kurulum ve yapılandırma
+# Etiketler: apache, web
+# ---------------------------------------------------------------------------
+
+- name: Apache ve PHP paketlerini kur
+  tags: apache, web, packages
+  ansible.builtin.apt:
+    name:
+      - apache2
+      - libapache2-mod-php
+    state: present
+  notify: apache yeniden başlat
+
+- name: Ana sayfayı oluştur
+  tags: apache, web, config
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "{{ web_root }}/index.html"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: apache yeniden başlat
+
+- name: Apache'nin başlangıçta otomatik başlamasını sağla
+  tags: apache, web
+  ansible.builtin.service:
+    name: "{{ apache_service }}"
+    state: started
+    enabled: yes

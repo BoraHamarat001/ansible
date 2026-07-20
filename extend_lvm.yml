@@ -1,0 +1,16 @@
+---
+# ===========================================================================
+# extend_lvm.yml — Yeni disk ekleyerek mevcut LVM'i genişlet
+# Önce lvm.yml çalıştırılmış olmalıdır.
+#
+# Kullanım:
+#   ansible-playbook extend_lvm.yml
+#   ansible-playbook extend_lvm.yml -e "lvm_extend_device=/dev/sdd"
+# ===========================================================================
+
+- name: LVM'i yeni diskle genişlet
+  hosts: storageservers
+  become: true
+  roles:
+    - common
+    - lvm_extend

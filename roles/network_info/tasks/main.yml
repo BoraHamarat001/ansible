@@ -1,0 +1,40 @@
+---
+# ---------------------------------------------------------------------------
+# network_info rolü — Sunucu ağ bilgilerini topla ve web sayfasına yaz
+# Apache önceden kurulu olmalıdır (apache rolü).
+# Etiketler: network, info, web
+# ---------------------------------------------------------------------------
+
+- name: Sunucu IP adresini al
+  tags: network, info
+  ansible.builtin.command: hostname -I
+  register: ip_result
+  changed_when: false
+
+- name: Sunucu saatini al
+  tags: network, info
+  ansible.builtin.command: date +%T
+  register: time_result
+  changed_when: false
+
+- name: Sunucu tarihini al
+  tags: network, info
+  ansible.builtin.command: date +%F
+  register: date_result
+  changed_when: false
+
+- name: Hostname bilgisini al
+  tags: network, info
+  ansible.builtin.command: hostname
+  register: hostname_result
+  changed_when: false
+
+- name: Ağ bilgilerini içeren HTML sayfasını oluştur
+  tags: network, info, web
+  ansible.builtin.template:
+    src: network_info.html.j2
+    dest: "{{ web_root | default('/var/www/html') }}/index.html"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: apache yeniden başlat

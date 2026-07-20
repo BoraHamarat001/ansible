@@ -1,0 +1,15 @@
+---
+# ===========================================================================
+# lvm.yml — Yeni disk üzerinde LVM kurulumu (PV → VG → LV → mount)
+#
+# Kullanım:
+#   ansible-playbook lvm.yml
+#   ansible-playbook lvm.yml -e "lvm_disk_device=/dev/sdc lvm_vg_name=data_vg"
+# ===========================================================================
+
+- name: LVM kur ve yapılandır
+  hosts: storageservers
+  become: true
+  roles:
+    - common
+    - lvm

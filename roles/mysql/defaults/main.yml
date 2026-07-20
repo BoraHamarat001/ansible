@@ -1,0 +1,8 @@
+---
+# MySQL rolü varsayılan değişkenleri
+# Hassas değerler (şifreler) vault/secrets.yml içinde tanımlanmalıdır.
+
+mysql_database_name: "db1"
+mysql_user: "bora"
+mysql_table_name: "users"
+# mysql_root_password ve mysql_password → vault/secrets.yml

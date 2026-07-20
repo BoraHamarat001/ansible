@@ -1,0 +1,80 @@
+---
+# ---------------------------------------------------------------------------
+# mysql rolü — MySQL kurulumu, yapılandırma ve kullanıcı yönetimi (Ubuntu/Debian)
+# Çalıştırma: ansible-playbook db.yml --ask-vault-pass
+# Etiketler: mysql, db
+# ---------------------------------------------------------------------------
+
+- name: MySQL Server ve Python kütüphanesini kur
+  tags: mysql, db, packages
+  ansible.builtin.apt:
+    name:
+      - mysql-server
+      - python3-pymysql
+    state: present
+
+- name: MySQL servisinin çalıştığından emin ol
+  tags: mysql, db
+  ansible.builtin.service:
+    name: mysql
+    state: started
+    enabled: yes
+
+- name: MySQL root şifresini ayarla
+  tags: mysql, db, security
+  community.mysql.mysql_user:
+    name: root
+    host: localhost
+    password: "{{ mysql_root_password }}"
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+    state: present
+
+- name: Anonim MySQL kullanıcısını kaldır
+  tags: mysql, db, security
+  community.mysql.mysql_user:
+    name: ""
+    host_all: yes
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    state: absent
+
+- name: Test veritabanını kaldır
+  tags: mysql, db, security
+  community.mysql.mysql_db:
+    name: test
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Uygulama veritabanını oluştur
+  tags: mysql, db
+  community.mysql.mysql_db:
+    name: "{{ mysql_database_name }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Uygulama kullanıcısını oluştur
+  tags: mysql, db, security
+  community.mysql.mysql_user:
+    name: "{{ mysql_user }}"
+    password: "{{ mysql_password }}"
+    priv: "{{ mysql_database_name }}.*:ALL"
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    state: present
+
+- name: Örnek tablo oluştur
+  tags: mysql, db, schema
+  community.mysql.mysql_query:
+    login_user: "{{ mysql_user }}"
+    login_password: "{{ mysql_password }}"
+    login_db: "{{ mysql_database_name }}"
+    query: |
+      CREATE TABLE IF NOT EXISTS {{ mysql_table_name }} (
+        id   INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );

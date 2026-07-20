@@ -1,0 +1,10 @@
+---
+# ---------------------------------------------------------------------------
+# common rolü — tüm sunucularda çalışan temel görevler
+# ---------------------------------------------------------------------------
+
+- name: Paket önbelleğini güncelle
+  tags: always, update
+  ansible.builtin.package:
+    update_cache: yes
+  changed_when: false

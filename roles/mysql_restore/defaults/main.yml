@@ -1,0 +1,6 @@
+---
+# MySQL yedek geri yükleme rolü için varsayılan değişkenler
+
+mysql_database_name: "db1"
+mysql_dump_src: "files/dump.sql"   # Yerel kaynak (playbook dizinine göre)
+mysql_dump_file: "/tmp/dump.sql"   # Uzak sunucuda hedef konum

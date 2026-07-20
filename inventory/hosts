@@ -1,0 +1,23 @@
+# ---------------------------------------------------------------------------
+# Merkezi inventory - tüm play'ler bu dosyayı kullanır.
+# Yeni sunucu eklendikçe ilgili gruba hostname veya IP ekleyin.
+# ---------------------------------------------------------------------------
+
+[webservers]
+192.168.1.45
+
+[dbservers]
+192.168.1.45
+
+[appservers]
+192.168.1.45
+
+[storageservers]
+192.168.1.45
+
+# Ortak grup - yukarıdaki grupların hepsini kapsar
+[all:children]
+webservers
+dbservers
+appservers
+storageservers

@@ -1,0 +1,47 @@
+---
+# ---------------------------------------------------------------------------
+# disk rolü — Yeni diski bölümle, formatla ve mount et (LVM'siz)
+# Etiketler: disk, storage, partition
+# ---------------------------------------------------------------------------
+
+- name: Gerekli paketleri kur (parted, xfsprogs)
+  tags: disk, storage, packages
+  ansible.builtin.package:
+    name:
+      - parted
+      - xfsprogs
+    state: present
+
+- name: Diskte GPT bölüm tablosu ve birincil bölüm oluştur
+  tags: disk, storage, partition
+  community.general.parted:
+    device: "{{ disk_device }}"
+    number: "{{ disk_partition_number }}"
+    state: present
+    part_type: primary
+    fs_type: "{{ disk_fstype }}"
+    part_start: 0%
+    part_end: 100%
+    align: optimal
+    label: gpt
+
+- name: Bölümü XFS ile formatla
+  tags: disk, storage, format
+  community.general.filesystem:
+    fstype: "{{ disk_fstype }}"
+    dev: "{{ disk_partition }}"
+
+- name: Mount noktası dizinini oluştur
+  tags: disk, storage, mount
+  ansible.builtin.file:
+    path: "{{ disk_mount_point }}"
+    state: directory
+    mode: "0755"
+
+- name: Bölümü mount et
+  tags: disk, storage, mount
+  ansible.posix.mount:
+    path: "{{ disk_mount_point }}"
+    src: "{{ disk_partition }}"
+    fstype: "{{ disk_fstype }}"
+    state: mounted

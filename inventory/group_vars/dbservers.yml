@@ -1,0 +1,17 @@
+---
+# ---------------------------------------------------------------------------
+# Veritabanı sunucuları için değişkenler
+# Hassas veriler (şifreler) vault/secrets.yml içinde saklanır.
+# Kullanım: ansible-playbook db.yml --ask-vault-pass
+# ---------------------------------------------------------------------------
+
+mysql_database_name: "db1"
+mysql_user: "bora"
+mysql_dump_file: "/tmp/dump.sql"
+mysql_table_name: "users"
+
+# Veri ve log dizin konumları
+mysql_data_dir: "/oracle/mysql/data"
+mysql_log_dir: "/oracle/mysql"
+mysql_log_file: "/oracle/mysql/error.log"
+mysql_config_file: "/etc/mysql/mysql.conf.d/mysqld.cnf"

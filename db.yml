@@ -1,0 +1,20 @@
+---
+# ===========================================================================
+# db.yml — MySQL veritabanı sunucusu kurulum ve yapılandırma
+#
+# Hassas değişkenler (şifreler) vault/secrets.yml içinde saklanır.
+#
+# Kullanım:
+#   ansible-playbook db.yml --ask-vault-pass
+#   ansible-playbook db.yml --vault-password-file ~/.vault_pass
+#   ansible-playbook db.yml --ask-vault-pass --tags security
+# ===========================================================================
+
+- name: MySQL veritabanı sunucusunu kur
+  hosts: dbservers
+  become: true
+  vars_files:
+    - vault/secrets.yml
+  roles:
+    - common
+    - mysql

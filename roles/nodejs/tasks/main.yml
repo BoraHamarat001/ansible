@@ -1,0 +1,67 @@
+---
+# ---------------------------------------------------------------------------
+# nodejs rolü — Node.js kurulumu, uygulama dağıtımı ve PM2 ile servis yönetimi
+# Etiketler: nodejs, app
+# ---------------------------------------------------------------------------
+
+- name: Node.js ve npm paketlerini kur
+  tags: nodejs, app, packages
+  ansible.builtin.apt:
+    name:
+      - nodejs
+      - npm
+    state: present
+
+- name: Uygulama dizinini oluştur
+  tags: nodejs, app
+  ansible.builtin.file:
+    path: "{{ node_app_dir }}"
+    state: directory
+    owner: "{{ node_app_user }}"
+    group: "{{ node_app_user }}"
+    mode: "0755"
+
+- name: npm projesini başlat (package.json yoksa)
+  tags: nodejs, app
+  ansible.builtin.command: npm init -y
+  args:
+    chdir: "{{ node_app_dir }}"
+    creates: "{{ node_app_dir }}/package.json"
+
+- name: Sunucu IP adresini al
+  tags: nodejs, app
+  ansible.builtin.command: hostname -I
+  register: server_ip
+  changed_when: false
+
+- name: index.js dosyasını oluştur
+  tags: nodejs, app, config
+  ansible.builtin.template:
+    src: index.js.j2
+    dest: "{{ node_app_dir }}/index.js"
+    owner: "{{ node_app_user }}"
+    group: "{{ node_app_user }}"
+    mode: "0644"
+
+- name: PM2'yi global olarak kur
+  tags: nodejs, app, pm2
+  community.general.npm:
+    name: pm2
+    global: yes
+
+- name: PM2 ile uygulamayı başlat (çalışmıyorsa)
+  tags: nodejs, app, pm2
+  ansible.builtin.command: pm2 start {{ node_app_dir }}/index.js --name {{ node_app_name }}
+  register: pm2_start
+  changed_when: "'already launched' not in pm2_start.stderr"
+  failed_when: pm2_start.rc != 0 and 'already launched' not in pm2_start.stderr
+
+- name: PM2 süreç listesini kaydet
+  tags: nodejs, app, pm2
+  ansible.builtin.command: pm2 save
+  changed_when: false
+
+- name: PM2'yi sistem başlangıcına ekle
+  tags: nodejs, app, pm2
+  ansible.builtin.command: pm2 startup
+  changed_when: false

@@ -1,0 +1,7 @@
+---
+# MySQL veri/log dizini taşıma rolü için varsayılan değişkenler
+
+mysql_data_dir: "/oracle/mysql/data"
+mysql_log_dir: "/oracle/mysql"
+mysql_log_file: "/oracle/mysql/error.log"
+mysql_config_file: "/etc/mysql/mysql.conf.d/mysqld.cnf"

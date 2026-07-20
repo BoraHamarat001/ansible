@@ -1,0 +1,68 @@
+---
+# ---------------------------------------------------------------------------
+# mysql_relocate rolü — MySQL veri ve log dizinlerini yeni konuma taşıma
+# Genellikle LVM üzerinde konumlanan /oracle dizinine taşır.
+# Çalıştırma: ansible-playbook db_relocate.yml --ask-vault-pass
+# Etiketler: mysql, relocate
+# ---------------------------------------------------------------------------
+
+- name: MySQL servisini durdur
+  tags: mysql, relocate
+  ansible.builtin.service:
+    name: mysql
+    state: stopped
+  notify: mysql başlat
+
+- name: MySQL log dizinini oluştur
+  tags: mysql, relocate
+  ansible.builtin.file:
+    path: "{{ mysql_log_dir }}"
+    state: directory
+    owner: mysql
+    group: mysql
+    mode: "0750"
+
+- name: MySQL veri dizinini oluştur
+  tags: mysql, relocate
+  ansible.builtin.file:
+    path: "{{ mysql_data_dir }}"
+    state: directory
+    owner: mysql
+    group: mysql
+    mode: "0750"
+
+- name: Boş error.log dosyasını oluştur
+  tags: mysql, relocate
+  ansible.builtin.file:
+    path: "{{ mysql_log_file }}"
+    state: touch
+    owner: mysql
+    group: mysql
+    mode: "0640"
+  changed_when: false
+
+- name: Mevcut MySQL verilerini yeni dizine kopyala
+  tags: mysql, relocate
+  ansible.builtin.copy:
+    src: /var/lib/mysql/
+    dest: "{{ mysql_data_dir }}"
+    owner: mysql
+    group: mysql
+    mode: preserve
+    remote_src: yes
+
+- name: MySQL yapılandırmasında datadir'i güncelle
+  tags: mysql, relocate, config
+  ansible.builtin.lineinfile:
+    path: "{{ mysql_config_file }}"
+    regexp: '^datadir\s*='
+    line: "datadir = {{ mysql_data_dir }}"
+  notify: mysql yeniden başlat
+
+- name: MySQL yapılandırmasında log_error'ı güncelle
+  tags: mysql, relocate, config
+  ansible.builtin.lineinfile:
+    path: "{{ mysql_config_file }}"
+    regexp: '^log_error\s*='
+    line: "log_error = {{ mysql_log_file }}"
+  notify: mysql yeniden başlat

@@ -1,0 +1,14 @@
+---
+# LVM genişletme rolü varsayılan değişkenleri
+
+lvm_vg_name: "oracle_vg"
+lvm_lv_name: "oracle_lv"
+lvm_fstype: "xfs"
+
+# Mevcut PV cihazı
+lvm_pv_device: "/dev/sdb1"
+
+# Genişletme için eklenecek yeni disk
+lvm_extend_device: "/dev/sdc"
+lvm_extend_partition: "/dev/sdc1"
+lvm_extend_partition_number: 1

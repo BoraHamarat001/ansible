@@ -1,0 +1,16 @@
+---
+# ===========================================================================
+# db_connect.yml — PHP-MySQL bağlantı sayfasını web sunucusuna kur
+# Apache ve MySQL kurulu ve çalışır durumda olmalıdır.
+#
+# Kullanım:
+#   ansible-playbook db_connect.yml --ask-vault-pass
+# ===========================================================================
+
+- name: PHP ve MySQL bağlantı sayfasını kur
+  hosts: webservers
+  become: true
+  vars_files:
+    - vault/secrets.yml
+  roles:
+    - php_mysql

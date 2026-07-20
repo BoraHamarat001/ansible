@@ -1,0 +1,13 @@
+---
+# LVM rolü varsayılan değişkenleri
+# group_vars/storageservers.yml içinden override edilebilir
+
+lvm_pv_device: "/dev/sdb1"
+lvm_vg_name: "oracle_vg"
+lvm_lv_name: "oracle_lv"
+lvm_mount_point: "/oracle"
+lvm_fstype: "xfs"
+
+# Kaynak disk ve bölüm
+lvm_disk_device: "/dev/sdb"
+lvm_disk_partition_number: 1

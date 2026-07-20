@@ -1,0 +1,9 @@
+---
+# Disk bölümleme rolü varsayılan değişkenleri
+# group_vars/storageservers.yml içinden override edilebilir
+
+disk_device: "/dev/sdb"
+disk_partition: "/dev/sdb1"
+disk_partition_number: 1
+disk_mount_point: "/data"
+disk_fstype: "xfs"

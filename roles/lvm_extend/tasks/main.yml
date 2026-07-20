@@ -1,0 +1,56 @@
+---
+# ---------------------------------------------------------------------------
+# lvm_extend rolü — Yeni disk ekleyerek mevcut LVM'i genişlet
+# Önce lvm.yml çalıştırılmış olmalıdır.
+# Etiketler: lvm, extend, storage
+# ---------------------------------------------------------------------------
+
+- name: Gerekli paketleri kur
+  tags: lvm, extend, packages
+  ansible.builtin.package:
+    name:
+      - parted
+      - xfsprogs
+      - lvm2
+    state: present
+
+- name: Yeni diskte bölüm oluştur
+  tags: lvm, extend, partition
+  community.general.parted:
+    device: "{{ lvm_extend_device }}"
+    number: "{{ lvm_extend_partition_number }}"
+    state: present
+    part_type: primary
+    fs_type: "{{ lvm_fstype }}"
+    part_start: 0%
+    part_end: 100%
+    align: optimal
+    label: gpt
+
+- name: Yeni bölümü LVM olarak işaretle
+  tags: lvm, extend, partition
+  community.general.parted:
+    device: "{{ lvm_extend_device }}"
+    number: "{{ lvm_extend_partition_number }}"
+    flags: [lvm]
+
+- name: Yeni PV'yi VG'ye ekleyerek Volume Group'u genişlet
+  tags: lvm, extend, vg
+  community.general.lvg:
+    vg: "{{ lvm_vg_name }}"
+    pvs: "{{ lvm_pv_device }},{{ lvm_extend_partition }}"
+
+- name: Logical Volume'u tüm boş alana genişlet
+  tags: lvm, extend, lv
+  community.general.lvol:
+    vg: "{{ lvm_vg_name }}"
+    lv: "{{ lvm_lv_name }}"
+    size: +100%FREE
+    state: present
+
+- name: Dosya sistemini yeni boyuta genişlet (online, --nouuid flag'i ile)
+  tags: lvm, extend, filesystem
+  community.general.filesystem:
+    fstype: "{{ lvm_fstype }}"
+    dev: "/dev/{{ lvm_vg_name }}/{{ lvm_lv_name }}"
+    resizefs: yes

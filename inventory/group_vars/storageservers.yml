@@ -1,0 +1,21 @@
+---
+# ---------------------------------------------------------------------------
+# Depolama/disk yönetimi sunucuları için değişkenler
+# ---------------------------------------------------------------------------
+
+# LVM ayarları
+lvm_pv_device: "/dev/sdb1"
+lvm_vg_name: "oracle_vg"
+lvm_lv_name: "oracle_lv"
+lvm_mount_point: "/oracle"
+lvm_fstype: "xfs"
+
+# LVM genişletme için ek disk
+lvm_extend_device: "/dev/sdc"
+lvm_extend_partition: "/dev/sdc1"
+
+# Düz disk bölümleme ayarları
+disk_device: "/dev/sdb"
+disk_partition: "/dev/sdb1"
+disk_mount_point: "/data"
+disk_fstype: "xfs"

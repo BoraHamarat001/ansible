@@ -1,0 +1,16 @@
+---
+# ===========================================================================
+# db_restore.yml — MySQL dump dosyasından veritabanını geri yükle
+#
+# Kullanım:
+#   ansible-playbook db_restore.yml --ask-vault-pass
+#   ansible-playbook db_restore.yml --ask-vault-pass -e "mysql_database_name=mydb"
+# ===========================================================================
+
+- name: MySQL veritabanını dump dosyasından geri yükle
+  hosts: dbservers
+  become: true
+  vars_files:
+    - vault/secrets.yml
+  roles:
+    - mysql_restore

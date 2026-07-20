@@ -1,0 +1,17 @@
+---
+# ===========================================================================
+# db_relocate.yml — MySQL veri ve log dizinlerini yeni konuma taşı
+# Genellikle LVM üzerinde konumlanan /oracle dizinine taşımak için kullanılır.
+# Önce lvm.yml çalıştırılmış olmalıdır.
+#
+# Kullanım:
+#   ansible-playbook db_relocate.yml --ask-vault-pass
+# ===========================================================================
+
+- name: MySQL dizinlerini yeniden konumlandır
+  hosts: dbservers
+  become: true
+  vars_files:
+    - vault/secrets.yml
+  roles:
+    - mysql_relocate

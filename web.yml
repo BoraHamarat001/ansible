@@ -1,0 +1,16 @@
+---
+# ===========================================================================
+# web.yml — Apache web sunucusu kurulum ve yapılandırma
+#
+# Kullanım:
+#   ansible-playbook web.yml
+#   ansible-playbook web.yml --tags apache
+#   ansible-playbook web.yml --tags config   # Sadece index.html güncelle
+# ===========================================================================
+
+- name: Web sunucusunu kur
+  hosts: webservers
+  become: true
+  roles:
+    - common
+    - apache

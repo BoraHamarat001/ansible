@@ -1,0 +1,30 @@
+---
+# ---------------------------------------------------------------------------
+# mysql_restore rolü — MySQL dump dosyasından veritabanını geri yükle
+# Çalıştırma: ansible-playbook db_restore.yml --ask-vault-pass
+# Etiketler: mysql, restore
+# ---------------------------------------------------------------------------
+
+- name: Dump dosyasını uzak sunucuya kopyala
+  tags: mysql, restore
+  ansible.builtin.copy:
+    src: "{{ mysql_dump_src }}"
+    dest: "{{ mysql_dump_file }}"
+    mode: "0644"
+
+- name: Veritabanını oluştur (yoksa)
+  tags: mysql, restore
+  community.mysql.mysql_db:
+    name: "{{ mysql_database_name }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+
+- name: Veritabanını dump dosyasından geri yükle
+  tags: mysql, restore
+  community.mysql.mysql_db:
+    name: "{{ mysql_database_name }}"
+    state: import
+    target: "{{ mysql_dump_file }}"
+    login_user: root
+    login_password: "{{ mysql_root_password }}"

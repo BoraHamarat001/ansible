@@ -1,0 +1,15 @@
+const http = require('http');
+
+// 0.0.0.0 kullanarak tüm arayüzlerden bağlantı kabul et
+const hostname = '0.0.0.0';
+const port = {{ node_app_port }};
+
+const server = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+  res.end('Hello from server: {{ server_ip.stdout | trim }}\n');
+});
+
+server.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});

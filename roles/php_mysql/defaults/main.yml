@@ -1,0 +1,10 @@
+---
+# PHP + MySQL bağlantı rolü için varsayılan değişkenler
+
+web_root: "/var/www/html"
+apache_service: "apache2"
+php_file: "db_connect.php"
+db_name: "db1"
+db_user: "bora"
+db_host: "localhost"
+# db_password → vault/secrets.yml

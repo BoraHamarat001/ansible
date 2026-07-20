@@ -1,0 +1,8 @@
+---
+# Node.js rolü varsayılan değişkenleri
+# group_vars/appservers.yml içinden override edilebilir
+
+node_app_dir: "/opt/my-server"
+node_app_port: 8000
+node_app_name: "my-server"
+node_app_user: "bora"

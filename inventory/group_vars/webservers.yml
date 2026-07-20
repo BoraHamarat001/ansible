@@ -1,0 +1,10 @@
+---
+# ---------------------------------------------------------------------------
+# Web sunucuları için değişkenler
+# ---------------------------------------------------------------------------
+
+web_root: "/var/www/html"
+apache_service: "apache2"
+site_title: "Nebula Cloud Systems"
+site_heading: "Welcome Nebula"
+site_description: "This is the default website page."

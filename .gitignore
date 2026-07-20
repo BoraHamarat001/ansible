@@ -1,0 +1,18 @@
+# Ansible Vault şifre dosyası — asla commit etme
+.vault_pass
+*.vault_pass
+
+# Retry dosyaları
+*.retry
+
+# Geçici dosyalar
+*.pyc
+__pycache__/
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Log dosyaları
+*.log

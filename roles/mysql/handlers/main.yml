@@ -1,0 +1,15 @@
+---
+- name: mysql yeniden başlat
+  ansible.builtin.service:
+    name: mysql
+    state: restarted
+
+- name: mysql durdur
+  ansible.builtin.service:
+    name: mysql
+    state: stopped
+
+- name: mysql başlat
+  ansible.builtin.service:
+    name: mysql
+    state: started

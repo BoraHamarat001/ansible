@@ -1,0 +1,15 @@
+---
+# ===========================================================================
+# network_info.yml — Sunucu ağ bilgilerini topla ve Apache ile sun
+# Apache önceden kurulu olmalıdır (web.yml).
+#
+# Kullanım:
+#   ansible-playbook network_info.yml
+# ===========================================================================
+
+- name: Ağ bilgilerini topla ve web sayfasına yaz
+  hosts: webservers
+  become: true
+  gather_facts: false
+  roles:
+    - network_info

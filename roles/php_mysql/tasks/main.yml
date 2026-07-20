@@ -1,0 +1,33 @@
+---
+# ---------------------------------------------------------------------------
+# php_mysql rolü — PHP ve PHP-MySQL eklentisi kurulumu, bağlantı dosyası oluşturma
+# Çalıştırma: ansible-playbook db_connect.yml --ask-vault-pass
+# Etiketler: php, mysql, web
+# ---------------------------------------------------------------------------
+
+- name: PHP ve php-mysql paketlerini kur
+  tags: php, mysql, web, packages
+  ansible.builtin.apt:
+    name:
+      - php
+      - php-mysql
+    state: present
+
+- name: Web kökünün sahipliğini ve izinlerini ayarla
+  tags: php, web
+  ansible.builtin.file:
+    path: "{{ web_root }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: "0755"
+
+- name: db_connect.php dosyasını oluştur
+  tags: php, mysql, web, config
+  ansible.builtin.template:
+    src: db_connect.php.j2
+    dest: "{{ web_root }}/{{ php_file }}"
+    owner: www-data
+    group: www-data
+    mode: "0644"
+  notify: apache yeniden başlat

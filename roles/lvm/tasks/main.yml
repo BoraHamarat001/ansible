@@ -1,0 +1,68 @@
+---
+# ---------------------------------------------------------------------------
+# lvm rolü — LVM kurulumu: PV, VG, LV oluşturma, formatlama ve mount
+# Etiketler: lvm, storage, disk
+# ---------------------------------------------------------------------------
+
+- name: Gerekli paketleri kur (parted, xfsprogs, lvm2)
+  tags: lvm, storage, packages
+  ansible.builtin.package:
+    name:
+      - parted
+      - xfsprogs
+      - lvm2
+    state: present
+
+- name: Diskte GPT bölüm tablosu ve birincil bölüm oluştur
+  tags: lvm, storage, partition
+  community.general.parted:
+    device: "{{ lvm_disk_device }}"
+    number: "{{ lvm_disk_partition_number }}"
+    state: present
+    part_type: primary
+    fs_type: "{{ lvm_fstype }}"
+    part_start: 0%
+    part_end: 100%
+    align: optimal
+    label: gpt
+
+- name: Bölüm türünü Linux LVM olarak işaretle
+  tags: lvm, storage, partition
+  community.general.parted:
+    device: "{{ lvm_disk_device }}"
+    number: "{{ lvm_disk_partition_number }}"
+    flags: [lvm]
+
+- name: Physical Volume (PV) ve Volume Group (VG) oluştur
+  tags: lvm, storage, vg
+  community.general.lvg:
+    vg: "{{ lvm_vg_name }}"
+    pvs: "{{ lvm_pv_device }}"
+
+- name: Logical Volume (LV) oluştur — tüm boş alanı kullan
+  tags: lvm, storage, lv
+  community.general.lvol:
+    vg: "{{ lvm_vg_name }}"
+    lv: "{{ lvm_lv_name }}"
+    size: +100%FREE
+
+- name: LV'yi XFS ile formatla
+  tags: lvm, storage, format
+  community.general.filesystem:
+    fstype: "{{ lvm_fstype }}"
+    dev: "/dev/{{ lvm_vg_name }}/{{ lvm_lv_name }}"
+
+- name: Mount noktası dizinini oluştur
+  tags: lvm, storage, mount
+  ansible.builtin.file:
+    path: "{{ lvm_mount_point }}"
+    state: directory
+    mode: "0755"
+
+- name: LV'yi mount et ve fstab'a ekle
+  tags: lvm, storage, mount
+  ansible.posix.mount:
+    path: "{{ lvm_mount_point }}"
+    src: "/dev/{{ lvm_vg_name }}/{{ lvm_lv_name }}"
+    fstype: "{{ lvm_fstype }}"
+    state: mounted
